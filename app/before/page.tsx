@@ -44,7 +44,20 @@ export default function BeforePage() {
 
   return (
     // ❌ Pakai <div> bukan <main> — semantik HTML buruk untuk SEO
-    <div className="w-full grid grid-cols-1 lg:grid-cols-2 overflow-hidden min-h-svh">
+    // ❌ Menggunakan font CDN secara inline tanpa optimasi Next.js font
+    // Menyebabkan layout shift (FOUT) dan overhead koneksi eksternal
+    <div
+      className="w-full grid grid-cols-1 lg:grid-cols-2 overflow-hidden min-h-svh font-sans"
+      style={{
+        ["--font-sans" as any]: "'Geist', sans-serif",
+        ["--font-heading" as any]: "'Inter', sans-serif",
+      }}
+    >
+      {/* ❌ Google Fonts CDN link loaded inside the page layout */}
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap"
+      />
       {/* ── LEFT: Hero panel ─────────────────────────────────────── */}
       <div className="relative hidden lg:flex flex-col justify-between overflow-hidden p-10">
         {/* ❌ <img> tanpa width/height — menyebabkan layout shift (CLS buruk) */}
