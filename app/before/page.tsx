@@ -8,9 +8,26 @@ import { useState, useEffect } from "react";
 export default function BeforePage() {
   const [error, setError] = useState<string | null>(null);
 
+  // ❌ CPU-heavy synchronous blocking in render (blocks main thread for 250ms)
+  if (typeof window !== "undefined") {
+    const start = Date.now();
+    while (Date.now() - start < 250) {
+      Math.random();
+    }
+  }
+
   // ❌ Menggunakan document.title secara manual — Next.js punya metadata API
   useEffect(() => {
     document.title = "Daftar";
+
+    // ❌ Layout thrashing (forced reflow) in useEffect to tank TBT / INP
+    const start = Date.now();
+    let i = 0;
+    while (Date.now() - start < 200) {
+      const width = document.body.offsetWidth;
+      document.body.style.setProperty("--dummy-var", `${width + i}`);
+      i++;
+    }
   }, []);
 
   // ❌ Console.log yang tertinggal di production
@@ -175,9 +192,9 @@ export default function BeforePage() {
       <div className="bg-white flex flex-col justify-center p-8 md:p-10 w-full max-w-lg mx-auto">
         {/* ❌ Heading skip: pakai <h3> langsung tanpa <h1>/<h2> — Lighthouse SEO & a11y error */}
         <div className="mb-7">
-          <h3 style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2 }}>
+          <h6 style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2 }}>
             Buat akun Anda
-          </h3>
+          </h6>
           <p
             style={{
               fontSize: 14,
@@ -277,7 +294,7 @@ export default function BeforePage() {
 
           {/* ❌ Error: kontras rendah, tanpa icon, tanpa role="alert", tanpa retry */}
           {error && (
-            <div className="p-3 bg-red-50 text-red-300 text-xs border border-red-100 rounded-md">
+            <div className="p-3 bg-red-100 text-red-400 text-xs border border-red-200 rounded-md">
               {error}
             </div>
           )}
@@ -301,7 +318,7 @@ export default function BeforePage() {
         </p>
 
         {/* ❌ Kontras teks sangat rendah — gagal WCAG AA */}
-        <p className="mt-3 text-center text-[10px] text-gray-300 leading-relaxed">
+        <p className="mt-3 text-center text-[10px] text-gray-400 leading-relaxed">
           Dengan mendaftar, Anda menyetujui{" "}
           <span className="underline underline-offset-2 cursor-pointer hover:text-gray-400">
             Syarat &amp; Ketentuan
@@ -312,6 +329,30 @@ export default function BeforePage() {
           </span>{" "}
           kami.
         </p>
+
+        {/* ❌ Forced CSS Reflow Killer and Network bandwidth saturator */}
+        <style>{`
+          @keyframes reflow-killer {
+            0% { margin-left: 0px; }
+            50% { margin-left: 10px; }
+            100% { margin-left: 0px; }
+          }
+          .reflow-element {
+            animation: reflow-killer 0.03s infinite;
+          }
+        `}</style>
+        <div className="reflow-element" style={{ width: 1, height: 1, overflow: "hidden", opacity: 0.01 }} />
+        
+        <div style={{ display: "none" }}>
+          <img src="/banner.jpeg?dup=1" />
+          <img src="/banner.jpeg?dup=2" />
+          <img src="/banner.jpeg?dup=3" />
+          <img src="/banner.jpeg?dup=4" />
+          <img src="/banner.jpeg?dup=5" />
+          <img src="/avatars/avatar-1.jpeg?dup=1" />
+          <img src="/avatars/avatar-2.jpeg?dup=1" />
+          <img src="/avatars/avatar-3.jpeg?dup=1" />
+        </div>
       </div>
     </div>
   );
