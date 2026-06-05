@@ -1,6 +1,11 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -45,7 +50,7 @@ const RegisterForm = () => {
   const onSubmit = (_data: FormValues) => {
     setLoading(true);
     setServerError(null);
-    console.log(_data);
+
     setTimeout(() => {
       setLoading(false);
       setServerError(
@@ -58,27 +63,11 @@ const RegisterForm = () => {
   const handleRetry = () => {
     setServerError(null);
     form.reset();
-    setTimeout(() => namaInputRef.current?.focus(), 50);
+
+    requestAnimationFrame(() => {
+      namaInputRef.current?.focus();
+    });
   };
-
-  if (serverError) {
-    return (
-      <div className="flex flex-col gap-4 py-2 animate-in fade-in duration-300">
-        <Alert variant="destructive">
-          <AlertCircle className="size-4" />
-
-          <AlertTitle>Gagal Mendaftar</AlertTitle>
-
-          <AlertDescription>{serverError}</AlertDescription>
-        </Alert>
-
-        <Button onClick={handleRetry} variant="destructive" className="w-full">
-          <RotateCcw />
-          Coba Lagi
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <form
@@ -147,6 +136,25 @@ const RegisterForm = () => {
           )}
         />
       </FieldGroup>
+
+      {serverError && (
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertTitle>Gagal Mendaftar</AlertTitle>
+          <AlertDescription>{serverError}</AlertDescription>
+          <AlertAction>
+            <Button
+              type="button"
+              size={"xs"}
+              variant="destructive"
+              onClick={handleRetry}
+            >
+              <RotateCcw />
+              Coba Lagi
+            </Button>
+          </AlertAction>
+        </Alert>
+      )}
 
       <Button
         type="submit"
