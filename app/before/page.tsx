@@ -1,12 +1,24 @@
 "use client";
 
-import { useState } from "react";
+/* eslint-disable jsx-a11y/alt-text */
+/* eslint-disable @next/next/no-img-element */
+
+import { useState, useEffect } from "react";
 
 export default function BeforePage() {
   const [error, setError] = useState<string | null>(null);
 
+  // ❌ Menggunakan document.title secara manual — Next.js punya metadata API
+  useEffect(() => {
+    document.title = "Daftar";
+  }, []);
+
+  // ❌ Console.log yang tertinggal di production
+  console.log("BeforePage rendered");
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("form submitted");
 
     setTimeout(() => {
       setError("Something went wrong");
@@ -14,13 +26,15 @@ export default function BeforePage() {
   };
 
   return (
-    <main className="w-full grid grid-cols-1 lg:grid-cols-2 overflow-hidden min-h-svh">
+    // ❌ Pakai <div> bukan <main> — semantik HTML buruk untuk SEO
+    <div className="w-full grid grid-cols-1 lg:grid-cols-2 overflow-hidden min-h-svh">
       {/* ── LEFT: Hero panel ─────────────────────────────────────── */}
       <div className="relative hidden lg:flex flex-col justify-between overflow-hidden p-10">
-        {/* ❌ Pakai <img> biasa — tidak ada lazy loading, priority hints, atau optimasi format */}
+        {/* ❌ <img> tanpa width/height — menyebabkan layout shift (CLS buruk) */}
+        {/* ❌ Format .jpeg — lebih berat dari .webp */}
+        {/* ❌ Tidak ada lazy/priority hint */}
         <img
           src="/banner.jpeg"
-          alt="Abstract gradient visual"
           className="absolute inset-0 w-full h-full object-cover"
         />
 
@@ -51,7 +65,7 @@ export default function BeforePage() {
                 background: "rgba(255,255,255,0.2)",
               }}
             >
-              {/* ❌ Inline SVG — tidak reusable, tidak accessible */}
+              {/* ❌ Inline SVG tanpa aria-hidden — screen reader membaca ini */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -118,19 +132,18 @@ export default function BeforePage() {
 
             <div className="flex items-center justify-between">
               <div className="flex" style={{ marginLeft: 12 }}>
-                {/* ❌ Pakai <img> biasa tanpa fallback/placeholder */}
+                {/* ❌ <img> tanpa alt, tanpa width/height eksplisit proper, tanpa fallback */}
                 {[
                   "/avatars/avatar-1.jpeg",
                   "/avatars/avatar-2.jpeg",
                   "/avatars/avatar-3.jpeg",
-                ].map((id) => (
+                ].map((src) => (
                   <img
-                    key={id}
-                    src={id}
-                    alt={`User ${id}`}
-                    width={32}
-                    height={32}
+                    key={src}
+                    src={src}
                     style={{
+                      width: 32,
+                      height: 32,
                       borderRadius: "50%",
                       border: "2px solid rgba(255,255,255,0.6)",
                       marginLeft: -12,
@@ -160,11 +173,11 @@ export default function BeforePage() {
 
       {/* ── RIGHT: Form panel ────────────────────────────────────── */}
       <div className="bg-white flex flex-col justify-center p-8 md:p-10 w-full max-w-lg mx-auto">
-        {/* Heading */}
+        {/* ❌ Heading skip: pakai <h3> langsung tanpa <h1>/<h2> — Lighthouse SEO & a11y error */}
         <div className="mb-7">
-          <h1 style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2 }}>
+          <h3 style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2 }}>
             Buat akun Anda
-          </h1>
+          </h3>
           <p
             style={{
               fontSize: 14,
@@ -178,7 +191,7 @@ export default function BeforePage() {
           </p>
         </div>
 
-        {/* Social login — ❌ Inline SVG, no reusable component */}
+        {/* Social login — ❌ <button> tanpa accessible name (tanpa aria-label dan teks terbungkus di <span>) */}
         <div className="flex flex-col md:flex-row gap-2.5">
           <button
             type="button"
@@ -224,13 +237,12 @@ export default function BeforePage() {
 
         {/* Form — ❌ Tanpa react-hook-form, tanpa Zod, tanpa validasi real-time */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* ❌ Tanpa label, tanpa Field component, tanpa aria-invalid */}
+          {/* ❌ <label> tanpa htmlFor — tidak terhubung ke input (a11y issue) */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="nama" className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-gray-700">
               Nama Lengkap
             </label>
             <input
-              id="nama"
               type="text"
               name="nama"
               placeholder="Contoh: Budi Santoso"
@@ -239,14 +251,11 @@ export default function BeforePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium text-gray-700"
-            >
+            {/* ❌ Email pakai type="text" bukan type="email" — browser tidak bisa bantu validasi */}
+            <label className="text-sm font-medium text-gray-700">
               Alamat Email
             </label>
             <input
-              id="email"
               type="text"
               name="email"
               placeholder="nama@email.com"
@@ -255,14 +264,10 @@ export default function BeforePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="password"
-              className="text-sm font-medium text-gray-700"
-            >
+            <label className="text-sm font-medium text-gray-700">
               Kata Sandi
             </label>
             <input
-              id="password"
               type="password"
               name="password"
               placeholder="Minimal 8 karakter"
@@ -270,14 +275,14 @@ export default function BeforePage() {
             />
           </div>
 
-          {/* ❌ Error generik, tanpa icon, tanpa retry button */}
+          {/* ❌ Error: kontras rendah, tanpa icon, tanpa role="alert", tanpa retry */}
           {error && (
-            <div className="p-3 bg-red-100 text-red-700 text-xs border border-red-200 rounded-md">
+            <div className="p-3 bg-red-50 text-red-300 text-xs border border-red-100 rounded-md">
               {error}
             </div>
           )}
 
-          {/* ❌ Tanpa loading spinner, tanpa disabled state */}
+          {/* ❌ Tanpa loading spinner, tanpa disabled state saat submit */}
           <button
             type="submit"
             className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-bold mt-2"
@@ -289,23 +294,25 @@ export default function BeforePage() {
         {/* Footer */}
         <p className="mt-4 text-center text-xs text-gray-500">
           Sudah punya akun?{" "}
+          {/* ❌ Pakai <span> bukan <a> — tidak bisa diakses keyboard, bukan link semantik */}
           <span className="text-blue-600 font-semibold hover:underline cursor-pointer underline-offset-4">
             Masuk
           </span>
         </p>
 
-        <p className="mt-3 text-center text-[10px] text-gray-400 leading-relaxed">
+        {/* ❌ Kontras teks sangat rendah — gagal WCAG AA */}
+        <p className="mt-3 text-center text-[10px] text-gray-300 leading-relaxed">
           Dengan mendaftar, Anda menyetujui{" "}
-          <span className="underline underline-offset-2 cursor-pointer hover:text-gray-500">
+          <span className="underline underline-offset-2 cursor-pointer hover:text-gray-400">
             Syarat &amp; Ketentuan
           </span>{" "}
           dan{" "}
-          <span className="underline underline-offset-2 cursor-pointer hover:text-gray-500">
+          <span className="underline underline-offset-2 cursor-pointer hover:text-gray-400">
             Kebijakan Privasi
           </span>{" "}
           kami.
         </p>
       </div>
-    </main>
+    </div>
   );
 }
