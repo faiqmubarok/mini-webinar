@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/purity */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 
@@ -8,7 +9,6 @@ import { useState, useEffect } from "react";
 export default function BeforePage() {
   const [error, setError] = useState<string | null>(null);
 
-  // ❌ CPU-heavy synchronous blocking in render (blocks main thread for 250ms)
   if (typeof window !== "undefined") {
     const start = Date.now();
     while (Date.now() - start < 250) {
@@ -16,11 +16,11 @@ export default function BeforePage() {
     }
   }
 
-  // ❌ Menggunakan document.title secara manual — Next.js punya metadata API
+  // Menggunakan document.title secara manual
   useEffect(() => {
     document.title = "Daftar";
 
-    // ❌ Layout thrashing (forced reflow) in useEffect to tank TBT / INP
+    // Layout thrashing (forced reflow) in useEffect to tank TBT / INP
     const start = Date.now();
     let i = 0;
     while (Date.now() - start < 200) {
@@ -30,7 +30,7 @@ export default function BeforePage() {
     }
   }, []);
 
-  // ❌ Console.log yang tertinggal di production
+  // Console.log yang tertinggal di production
   console.log("BeforePage rendered");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -43,8 +43,8 @@ export default function BeforePage() {
   };
 
   return (
-    // ❌ Pakai <div> bukan <main> — semantik HTML buruk untuk SEO
-    // ❌ Menggunakan font CDN secara inline tanpa optimasi Next.js font
+    // Pakai <div> bukan <main> — semantik HTML buruk untuk SEO
+    // Menggunakan font CDN secara inline
     // Menyebabkan layout shift (FOUT) dan overhead koneksi eksternal
     <div
       className="w-full grid grid-cols-1 lg:grid-cols-2 overflow-hidden min-h-svh font-sans"
@@ -53,16 +53,16 @@ export default function BeforePage() {
         ["--font-heading" as any]: "'Inter', sans-serif",
       }}
     >
-      {/* ❌ Google Fonts CDN link loaded inside the page layout */}
+      {/* Google Fonts CDN link loaded inside the page layout */}
       <link
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap"
       />
       {/* ── LEFT: Hero panel ─────────────────────────────────────── */}
       <div className="relative hidden lg:flex flex-col justify-between overflow-hidden p-10">
-        {/* ❌ <img> tanpa width/height — menyebabkan layout shift (CLS buruk) */}
-        {/* ❌ Format .jpeg — lebih berat dari .webp */}
-        {/* ❌ Tidak ada lazy/priority hint */}
+        {/* <img> tanpa width/height — menyebabkan layout shift (CLS buruk) */}
+        {/* Format .jpeg — lebih berat dari .webp */}
+        {/* Tidak ada lazy/priority hint */}
         <img
           src="/banner.jpeg"
           className="absolute inset-0 w-full h-full object-cover"
@@ -95,7 +95,7 @@ export default function BeforePage() {
                 background: "rgba(255,255,255,0.2)",
               }}
             >
-              {/* ❌ Inline SVG tanpa aria-hidden — screen reader membaca ini */}
+              {/* Inline SVG tanpa aria-hidden — screen reader membaca ini */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -162,11 +162,11 @@ export default function BeforePage() {
 
             <div className="flex items-center justify-between">
               <div className="flex" style={{ marginLeft: 12 }}>
-                {/* ❌ <img> tanpa alt, tanpa width/height eksplisit proper, tanpa fallback */}
+                {/* <img> tanpa alt, tanpa width/height eksplisit proper, tanpa fallback */}
                 {[
-                  "/avatars/avatar-1.jpeg",
-                  "/avatars/avatar-2.jpeg",
-                  "/avatars/avatar-3.jpeg",
+                  "/avatars/avatar-1.png",
+                  "/avatars/avatar-2.png",
+                  "/avatars/avatar-3.png",
                 ].map((src) => (
                   <img
                     key={src}
@@ -203,7 +203,7 @@ export default function BeforePage() {
 
       {/* ── RIGHT: Form panel ────────────────────────────────────── */}
       <div className="bg-white flex flex-col justify-center p-8 md:p-10 w-full max-w-lg mx-auto">
-        {/* ❌ Heading skip: pakai <h3> langsung tanpa <h1>/<h2> — Lighthouse SEO & a11y error */}
+        {/*  Heading skip: pakai <h3> langsung tanpa <h1>/<h2> — Lighthouse SEO & a11y error */}
         <div className="mb-7">
           <h6 style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2 }}>
             Buat akun Anda
@@ -221,7 +221,7 @@ export default function BeforePage() {
           </p>
         </div>
 
-        {/* Social login — ❌ <button> tanpa accessible name (tanpa aria-label dan teks terbungkus di <span>) */}
+        {/* Social login —  <button> tanpa accessible name (tanpa aria-label dan teks terbungkus di <span>) */}
         <div className="flex flex-col md:flex-row gap-2.5">
           <button
             type="button"
@@ -265,9 +265,9 @@ export default function BeforePage() {
           <div className="flex-1 h-px bg-gray-200" />
         </div>
 
-        {/* Form — ❌ Tanpa react-hook-form, tanpa Zod, tanpa validasi real-time */}
+        {/* Form — Tanpa react-hook-form, tanpa Zod, tanpa validasi real-time */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* ❌ <label> tanpa htmlFor — tidak terhubung ke input (a11y issue) */}
+          {/* <label> tanpa htmlFor — tidak terhubung ke input (a11y issue) */}
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-gray-700">
               Nama Lengkap
@@ -281,7 +281,7 @@ export default function BeforePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            {/* ❌ Email pakai type="text" bukan type="email" — browser tidak bisa bantu validasi */}
+            {/* Email pakai type="text" bukan type="email" — browser tidak bisa bantu validasi */}
             <label className="text-sm font-medium text-gray-700">
               Alamat Email
             </label>
@@ -305,14 +305,14 @@ export default function BeforePage() {
             />
           </div>
 
-          {/* ❌ Error: kontras rendah, tanpa icon, tanpa role="alert", tanpa retry */}
+          {/* Error: kontras rendah, tanpa icon, tanpa role="alert", tanpa retry */}
           {error && (
             <div className="p-3 bg-red-100 text-red-400 text-xs border border-red-200 rounded-md">
               {error}
             </div>
           )}
 
-          {/* ❌ Tanpa loading spinner, tanpa disabled state saat submit */}
+          {/* Tanpa loading spinner, tanpa disabled state saat submit */}
           <button
             type="submit"
             className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-bold mt-2"
@@ -324,13 +324,13 @@ export default function BeforePage() {
         {/* Footer */}
         <p className="mt-4 text-center text-xs text-gray-500">
           Sudah punya akun?{" "}
-          {/* ❌ Pakai <span> bukan <a> — tidak bisa diakses keyboard, bukan link semantik */}
+          {/* Pakai <span> bukan <a> — tidak bisa diakses keyboard, bukan link semantik */}
           <span className="text-blue-600 font-semibold hover:underline cursor-pointer underline-offset-4">
             Masuk
           </span>
         </p>
 
-        {/* ❌ Kontras teks sangat rendah — gagal WCAG AA */}
+        {/* Kontras teks sangat rendah — gagal WCAG AA */}
         <p className="mt-3 text-center text-[10px] text-gray-400 leading-relaxed">
           Dengan mendaftar, Anda menyetujui{" "}
           <span className="underline underline-offset-2 cursor-pointer hover:text-gray-400">
@@ -343,7 +343,7 @@ export default function BeforePage() {
           kami.
         </p>
 
-        {/* ❌ Forced CSS Reflow Killer and Network bandwidth saturator */}
+        {/* Forced CSS Reflow Killer and Network bandwidth saturator */}
         <style>{`
           @keyframes reflow-killer {
             0% { margin-left: 0px; }
