@@ -354,18 +354,10 @@ export default function BeforePage() {
             animation: reflow-killer 0.03s infinite;
           }
         `}</style>
-        <div className="reflow-element" style={{ width: 1, height: 1, overflow: "hidden", opacity: 0.01 }} />
-        
-        <div style={{ display: "none" }}>
-          <img src="/banner.jpeg?dup=1" />
-          <img src="/banner.jpeg?dup=2" />
-          <img src="/banner.jpeg?dup=3" />
-          <img src="/banner.jpeg?dup=4" />
-          <img src="/banner.jpeg?dup=5" />
-          <img src="/avatars/avatar-1.jpeg?dup=1" />
-          <img src="/avatars/avatar-2.jpeg?dup=1" />
-          <img src="/avatars/avatar-3.jpeg?dup=1" />
-        </div>
+        <div
+          className="reflow-element"
+          style={{ width: 1, height: 1, overflow: "hidden", opacity: 0.01 }}
+        />
       </div>
     </div>
   );
